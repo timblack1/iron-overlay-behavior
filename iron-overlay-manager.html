@@ -133,8 +133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       if (newZ <= minimumZ) {
         this._applyOverlayZ(overlay, minimumZ);
       }
-      var element = this.deepActiveElement;
-      overlay.restoreFocusNode = this._overlayParent(element) ? null : element;
+      overlay.restoreFocusNode = this.deepActiveElement;
     },
 
     /**

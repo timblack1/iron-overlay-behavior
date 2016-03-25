@@ -57,7 +57,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <test-fixture id="autofocus">
       <template>
-        <test-overlay>
+        <test-overlay tabindex="0">
           Autofocus
           <button autofocus>button</button>
         </test-overlay>
@@ -424,6 +424,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           assert.notEqual(Polymer.dom(overlay).querySelector('[autofocus]'), document.activeElement, '<button autofocus> not immediately focused');
         });
 
+
+        test('no-auto-focus will not affect focus on close', function(done) {
+          // Make overlay2 focusable to test no-auto-focus correctly works.
+          var overlay2 = fixture('basic');
+          overlay2.setAttribute('tabindex', '0');
+          overlay2.noAutoFocus = true;
+          runAfterOpen(overlay,function () {
+            // Simulate change of focus, to see if it gets altered after opening overlay2.
+            overlay.focus();
+            runAfterOpen(overlay2, function() {
+              assert.equal(overlay, document.activeElement, 'overlay still focused after opening overlay2');
+              runAfterClose(overlay2, function() {
+                assert.equal(overlay, document.activeElement, 'overlay still focused after closing overlay2');
+                done();
+              });
+            });
+          });
+        });
+
         test('no-cancel-on-outside-click property; focus stays on overlay when click outside', function(done) {
           overlay.noCancelOnOutsideClick = true;
           runAfterOpen(overlay, function() {
@@ -445,7 +464,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           runAfterOpen(overlay, function() {
             // Try to steal the focus
             MockInteractions.focus(button);
-            assert.equal(Polymer.dom(overlay).querySelector('[autofocus]'), document.activeElement, '<button autofocus> is focused');
+            assert.equal(overlay._focusNode, document.activeElement, 'focus trapped');
+            assert.equal(focusSpy.callCount, 0, 'button in body did not get the focus');
+            document.body.removeChild(button);
+            done();
+          });
+        });
+
+        test('with-backdrop traps the focus within the overlay even if it has no-auto-focus', function(done) {
+          var focusSpy = sinon.stub();
+          var button = document.createElement('button');
+          document.body.appendChild(button);
+          button.addEventListener('focus', focusSpy, true);
+
+          overlay.withBackdrop = true;
+          overlay.noAutoFocus = true;
+          runAfterOpen(overlay, function() {
+            assert.notEqual(overlay._focusNode, document.activeElement, 'focus not changed after open');
+            // Try to steal the focus
+            MockInteractions.focus(button);
+            assert.equal(overlay._focusNode, document.activeElement, 'focus trapped');
             assert.equal(focusSpy.callCount, 0, 'button in body did not get the focus');
             document.body.removeChild(button);
             done();
@@ -593,23 +631,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             runAfterClose(overlay, function() {
               assert.equal(Polymer.IronOverlayManager.deepActiveElement, focusable, 'focus restored to focusable');
               done();
-            });
-          });
-        });
-
-        test('overlay does not return focus to elements contained in another overlay', function(done) {
-          var overlay2 = fixture('basic');
-          // So it doesn't interfere with focus changes.
-          overlay2.noAutoFocus = true;
-          var focusable = document.createElement('input');
-          runAfterOpen(overlay2,function () {
-            Polymer.dom(overlay2).appendChild(focusable);
-            focusable.focus();
-            runAfterOpen(overlay, function() {
-              runAfterClose(overlay, function() {
-                assert.notEqual(Polymer.IronOverlayManager.deepActiveElement, focusable, 'focus not restored to focusable inside overlay2');
-                done();
-              });
             });
           });
         });

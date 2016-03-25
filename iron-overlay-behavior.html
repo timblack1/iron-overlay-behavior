@@ -453,14 +453,14 @@ context. You should place this element as a child of `<body>` whenever possible.
      * @protected
      */
     _applyFocus: function() {
+      if (this.noAutoFocus) {
+        return;
+      }
       if (this.opened) {
-        if (!this.noAutoFocus) {
-          this._focusNode.focus();
-        }
+        this._focusNode.focus();
       } else {
         this._focusNode.blur();
         this._focusedChild = null;
-        this._manager.focusOverlay();
       }
     },
 
@@ -487,7 +487,7 @@ context. You should place this element as a child of `<body>` whenever possible.
       var path = Polymer.dom(event).path;
       if (path.indexOf(this) === -1) {
         event.stopPropagation();
-        this._applyFocus();
+        this._focusNode.focus();
       } else {
         this._focusedChild = path[0];
       }
