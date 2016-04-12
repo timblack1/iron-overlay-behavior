@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<link rel="import" href="iron-overlay-behavior.html">
 
 <script>
 
@@ -250,15 +251,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     },
 
     /**
-     * Returns if a node is an overlay.
-     * @param {Element=} node
-     * @return {boolean}
-     */
-    isOverlay: function(node) {
-      return (node && node._manager === this);
-    },
-
-    /**
      * Returns the first opened overlay that has a backdrop.
      * @return {Element|undefined}
      * @private
@@ -317,7 +309,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     _overlayParent: function(node) {
       while (node && node !== document.body) {
         // Check if it is an overlay.
-        if (this.isOverlay(node)) {
+        if (node.isOverlay) {
           return node;
         }
         // Use logical parentNode, or native ShadowRoot host.
@@ -334,7 +326,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     _overlayInPath: function(path) {
       path = path || [];
       for (var i = 0; i < path.length; i++) {
-        if (this.isOverlay(path[i])) {
+        if (path[i].isOverlay) {
           return path[i];
         }
       }
