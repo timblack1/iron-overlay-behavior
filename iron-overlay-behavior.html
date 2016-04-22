@@ -137,6 +137,17 @@ context. You should place this element as a child of `<body>` whenever possible.
       },
 
       /**
+       * The backdrop element.
+       * @type {Element}
+       */
+      backdropElement: {
+        type: Element,
+        value: function() {
+          return Polymer.IronOverlayManager.backdropElement;
+        }
+      },
+
+      /**
        * Shortcut to access to the overlay manager.
        * @private
        * @type {Polymer.IronOverlayManagerClass}
@@ -158,14 +169,6 @@ context. You should place this element as a child of `<body>` whenever possible.
 
     listeners: {
       'iron-resize': '_onIronResize'
-    },
-
-    /**
-     * The backdrop element.
-     * @type {Element}
-     */
-    get backdropElement() {
-      return this._manager.backdropElement;
     },
 
     /**
@@ -255,6 +258,7 @@ context. You should place this element as a child of `<body>` whenever possible.
       Polymer.dom(this).unobserveNodes(this._observer);
       this._observer = null;
       this.opened = false;
+      this._manager.trackBackdrop(this);
     },
 
     /**
@@ -328,6 +332,8 @@ context. You should place this element as a child of `<body>` whenever possible.
         return;
       }
 
+      this._manager.trackBackdrop(this);
+
       this.__isAnimating = true;
 
       if (this.opened) {
@@ -355,8 +361,8 @@ context. You should place this element as a child of `<body>` whenever possible.
         this.removeAttribute('tabindex');
         this.__shouldRemoveTabIndex = false;
       }
-      if (this.opened) {
-        this._manager.trackBackdrop();
+      if (this.opened && this.isAttached) {
+        this._manager.trackBackdrop(this);
       }
     },
 

@@ -122,7 +122,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       } else {
         this.removeOverlay(overlay);
       }
-      this.trackBackdrop();
     },
 
     /**
@@ -223,10 +222,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     /**
      * Updates the backdrop z-index.
+     * @param {!Element} overlay
      */
-    trackBackdrop: function() {
-      this.backdropElement.style.zIndex = this.backdropZ();
-      this.backdropElement.setOpened(!!this._overlayWithBackdrop());
+    trackBackdrop: function(overlay) {
+      // First, set these to false; the next forEach will set them to true if needed.
+      overlay.backdropElement.setOpened(false);
+      this.backdropElement.setOpened(false);
+      var backdrop, overlay;
+      for (var i = 0; i < this._overlays.length; i++) {
+        overlay = this._overlays[i];
+        if (overlay.withBackdrop && (!backdrop || backdrop !== overlay.backdropElement)) {
+          backdrop = overlay.backdropElement;
+          backdrop.style.zIndex = this._getZ(overlay) - 1;
+          backdrop.setOpened(true);
+        }
+      }
     },
 
     /**
